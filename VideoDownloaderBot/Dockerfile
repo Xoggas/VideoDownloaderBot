@@ -2,18 +2,13 @@
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-COPY ["VideoDownloaderBot/VideoDownloaderBot.csproj", "VideoDownloaderBot/"]
-RUN dotnet restore "VideoDownloaderBot/VideoDownloaderBot.csproj"
-COPY . .
-WORKDIR "/src/VideoDownloaderBot"
-RUN dotnet build "VideoDownloaderBot.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "VideoDownloaderBot.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY . ./
+RUN dotnet restore
+RUN dotnet publish -c Release -o out
+
+FROM base AS runtime
+WORKDIR /app
+COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "VideoDownloaderBot.dll"]
