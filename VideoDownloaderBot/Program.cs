@@ -8,9 +8,7 @@ WebApplication app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
 
-var appThread = new Thread(() => app.Run($"http://0.0.0.0:{port}"));
-
-appThread.Start();
+await app.RunAsync($"http://0.0.0.0:{port}");
 
 var token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
 
@@ -22,5 +20,3 @@ if (string.IsNullOrEmpty(token))
 var bot = new Bot(token);
 
 bot.Start();
-
-await Task.Delay(-1);
